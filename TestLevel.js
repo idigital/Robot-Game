@@ -27,10 +27,15 @@ function Init() {
     //create player
     bodyDef.type = b2Body.b2_dynamicBody;
     fixDef.shape = new b2CircleShape(0.5);
-    bodyDef.position.Set(0, 0);
+    bodyDef.position.Set(10, 10);
     bodyDef.allowSleep = false;
     var player = world.CreateBody(bodyDef).CreateFixture(fixDef);
 
+    //create some blocks
+    createBlock(0, 0);
+    createBlock(1, 0);
+    createBlock(0, 1);
+    createBlock(3, 5);
 
     //setup debug draw
     var debugDraw = new b2DebugDraw();
@@ -47,6 +52,14 @@ function Init() {
         world.Step(1 / 60, 10, 10);
         world.DrawDebugData();
         world.ClearForces();
+    };
+
+    function createBlock(x, y) {
+        bodyDef.type = b2Body.b2_staticBody;
+        fixDef.shape = new b2PolygonShape;
+        fixDef.shape.SetAsBox(0.5, 0.5);
+        bodyDef.position.Set(x + 0.5, y + 0.5);
+        world.CreateBody(bodyDef).CreateFixture(fixDef);
     };
 
 }
