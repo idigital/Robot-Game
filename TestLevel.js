@@ -35,7 +35,6 @@ function Init() {
 	var request = new XMLHttpRequest();
 	request.onreadystatechange = function() {
 		if (request.readyState==4 && request.status==200) {
-			console.dir(request);
 			var levelData = JSON.parse(request.responseText);
 			for (i in levelData) {
 				createBlock(levelData[i].x, levelData[i].y);
