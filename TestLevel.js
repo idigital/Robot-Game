@@ -31,12 +31,38 @@ function Init() {
     bodyDef.allowSleep = false;
     var player = world.CreateBody(bodyDef).CreateFixture(fixDef);
 
-    //create some blocks
-    createBlock(0, 0);
-    createBlock(1, 0);
-    createBlock(0, 1);
-    createBlock(3, 5);
-
+    //load level
+	var request = new XMLHttpRequest();
+	request.onreadystatechange = function() {
+		if (request.readyState==4 && request.status==200) {
+			console.dir(request);
+			var levelData = JSON.parse(request.responseText);
+			for (i in levelData) {
+				createBlock(levelData[i].x, levelData[i].y);
+			}
+		}
+	}
+	request.open("GET", "Level1.txt", true);
+	request.send();	
+	
+	document.addEventListener("keydown", function (key) {
+        var currentVelocity = player.GetBody().GetLinearVelocity();
+        if (key.keyCode === 65) {
+            //move left
+            player.GetBody().SetLinearVelocity(new b2Vec2(-2.5, currentVelocity.y));
+        } else if (key.keyCode === 68) {
+            //move right
+            player.GetBody().SetLinearVelocity(new b2Vec2(2.5, currentVelocity.y));
+        } else if (key.keyCode === 87) {
+            //move up
+            if (currentVelocity.y === 0) {
+                player.GetBody().SetLinearVelocity(new b2Vec2(currentVelocity.x, -6.5));
+            }
+        } else if (key.keyCode === 83) {
+            //move down                        
+        }
+    });	
+	
     //setup debug draw
     var debugDraw = new b2DebugDraw();
     debugDraw.SetSprite(document.getElementById("levelCanvas").getContext("2d"));
@@ -61,5 +87,4 @@ function Init() {
         bodyDef.position.Set(x + 0.5, y + 0.5);
         world.CreateBody(bodyDef).CreateFixture(fixDef);
     };
-
 }
