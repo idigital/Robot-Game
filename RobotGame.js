@@ -14,9 +14,10 @@
 		b2DebugDraw = Box2D.Dynamics.b2DebugDraw,
 		b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef;
 
-    // private variables    
+    // private variables
     var world;
     var player;
+    var debugDrawOn;
 
     var fixDef = new b2FixtureDef;
     fixDef.density = 1.0;
@@ -39,7 +40,9 @@
         fixDef.shape = new b2CircleShape(0.5);
         bodyDef.position.Set(x + 0.5, y + 0.5);
         bodyDef.allowSleep = false;
+        bodyDef.userData = { type: 'player' };
         player = world.CreateBody(bodyDef).CreateFixture(fixDef);
+
         player.MoveLeft = function () {
             var currentVelocity = this.GetBody().GetLinearVelocity();
             this.GetBody().SetLinearVelocity(new b2Vec2(-2.5, currentVelocity.y));
@@ -54,7 +57,6 @@
                 this.GetBody().SetLinearVelocity(new b2Vec2(currentVelocity.x, -6.5));
             }
         };
-
     };
 
     var CreateBlock = function (x, y) {
@@ -62,6 +64,7 @@
         fixDef.shape = new b2PolygonShape;
         fixDef.shape.SetAsBox(0.5, 0.5);
         bodyDef.position.Set(x + 0.5, y + 0.5);
+        bodyDef.userData = { type: 'brick' };
         world.CreateBody(bodyDef).CreateFixture(fixDef);
     };
 
@@ -80,28 +83,55 @@
             if (key.keyCode === 65) {
                 player.MoveLeft();
             } else if (key.keyCode === 68) {
-                //move right
                 player.MoveRight();
             } else if (key.keyCode === 87) {
                 player.Jump();
             } else if (key.keyCode === 83) {
-                //move down
+
             }
         });
     };
 
+    var DrawWorld = function (gameWorld) {
+        var scale = 64;
+        var worldbody = gameWorld.GetBodyList();
+        var canvas = document.getElementById("levelCanvas")
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        while (worldbody.GetNext() !== null) {
+            var bodypos = worldbody.GetPosition();
+            if (worldbody.GetUserData().type === 'brick') {
+                DrawBox(bodypos.x, bodypos.y);
+            } else {
+                DrawPlayer(bodypos.x, bodypos.y);
+            }
+            worldbody = worldbody.GetNext();
+        }
+        function DrawBox(x, y) {
+            var img = new Image();
+            img.src = "Spritesheet.png";
+            ctx.drawImage(img, 0, 32, 32, 32, x * scale, y * scale, scale, scale);
+        }
+        function DrawPlayer(x, y) {
+            var img = new Image();
+            img.src = "Spritesheet.png";
+            ctx.drawImage(img, 32, 0, 32, 32, x * scale, y * scale, scale, scale);
+        }
+    };
 
     // public API
     return {
         Init: function () {
             CreateWorld();
             SetupControls();
-            SetupDebugDraw("levelCanvas");
+            if (debugDrawOn) {
+                SetupDebugDraw("levelCanvas");
+            }
         },
 
         LoadLevel: function (levelNumber) {
             var levelFileName = "Level" + levelNumber + ".txt";
-            console.log("Loading Level from " + levelFileName);
+
             var request = new XMLHttpRequest();
             request.onreadystatechange = function () {
                 if (request.readyState == 4 && request.status == 200) {
@@ -121,11 +151,16 @@
 
         Update: function () {
             world.Step(1 / 60, 10, 10);
-            world.DrawDebugData();
+            if (debugDrawOn) {
+                world.DrawDebugData();
+            } else {
+                DrawWorld(world);
+            }
             world.ClearForces();
         },
 
-        Play: function () {
+        Play: function (isDebugDrawOn) {
+            debugDrawOn = isDebugDrawOn;
             this.Init();
             this.LoadLevel(1);
             window.setInterval(this.Update, 1000 / 60);
