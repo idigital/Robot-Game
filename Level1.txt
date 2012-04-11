@@ -1,22 +1,25 @@
 [
 {"x":0,"y":0,"type":"player"},
 
-{"x":0,"y":4,"type":"block"},
-{"x":1,"y":4,"type":"block"},
+{"x":0,"y":3,"type":"warpExit"},
+{"x":0,"y":4,"type":"brick"},
+{"x":1,"y":4,"type":"brick"},
 
-{"x":4,"y":8,"type":"block"},
-{"x":5,"y":13,"type":"block"},
+{"x":4,"y":8,"type":"brick"},
+{"x":5,"y":13,"type":"brick"},
 
-{"x":0,"y":20,"type":"block"},
-{"x":1,"y":20,"type":"block"},
-{"x":2,"y":20,"type":"block"},
-{"x":3,"y":20,"type":"block"},
-{"x":4,"y":20,"type":"block"},
-{"x":5,"y":20,"type":"block"},
-{"x":6,"y":20,"type":"block"},
-{"x":7,"y":20,"type":"block"},
-{"x":8,"y":20,"type":"block"},
-{"x":9,"y":20,"type":"block"},
-{"x":10,"y":20,"type":"block"},
-{"x":11,"y":20,"type":"block"}
+{"x":0,"y":20,"type":"brick"},
+{"x":1,"y":20,"type":"brick"},
+{"x":2,"y":20,"type":"brick"},
+{"x":3,"y":20,"type":"brick"},
+{"x":4,"y":20,"type":"brick"},
+{"x":5,"y":20,"type":"brick"},
+{"x":6,"y":20,"type":"brick"},
+{"x":7,"y":20,"type":"brick"},
+{"x":8,"y":20,"type":"brick"},
+{"x":9,"y":20,"type":"brick"},
+{"x":10,"y":20,"type":"brick"},
+{"x":11,"y":20,"type":"brick"},
+
+{"x":11,"y":19,"type":"warpEnter"}
 ]

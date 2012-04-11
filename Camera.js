@@ -3,8 +3,14 @@
 ROBOTGAME.Camera = (function () {
     var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
     var debugDraw,
-        debugDrawOn,
-        yoffset;
+        debugDrawOn;
+
+    var textureMap = {
+        brick: { x: 0, y: 1 },
+        player: { x: 1, y: 0 },
+        warpEnter: { x: 0, y: 0 },
+        warpExit: { x: 0, y: 0 }
+    };
 
     var SetupDebugDraw = function (canvasElement, world) {
         debugDraw = new b2DebugDraw();
@@ -28,38 +34,28 @@ ROBOTGAME.Camera = (function () {
         ctx.translate(-playerpos.x * scale, -playerpos.y * scale);
         while (worldbody.GetNext() !== null) {
             var bodypos = worldbody.GetPosition();
-            if (worldbody.GetUserData().type === 'brick') {
-                DrawBox(bodypos.x, bodypos.y);
-            } else {
-                DrawPlayer(bodypos.x, bodypos.y);
-            }
+            DrawObject(bodypos.x, bodypos.y, worldbody.GetUserData().type);
             worldbody = worldbody.GetNext();
         }
 
         ctx.restore();
-        function DrawBox(x, y) {
+        function DrawObject(x, y, type) {
+            var spriteGridSpacing = 32;
             var img = new Image();
             img.src = "Spritesheet.png";
-            ctx.drawImage(img, 0, 32, 32, 32, x * scale, y * scale, scale, scale);
-        }
-        function DrawPlayer(x, y) {
-            var img = new Image();
-            img.src = "Spritesheet.png";
-            ctx.drawImage(img, 32, 0, 32, 32, x * scale, y * scale, scale, scale);
-        }
+            var gridx = textureMap[type].x;
+            var gridy = textureMap[type].y;
+            ctx.drawImage(img, gridx * spriteGridSpacing, gridy * spriteGridSpacing, spriteGridSpacing, spriteGridSpacing, x * scale, y * scale, scale, scale);
+        }        
     };
 
     return {
         Init: function (world) {
             debugDrawOn = false;
             SetupDebugDraw("levelCanvas", world);
-            yoffset = 0;
         },
         ToggleDebugDraw: function () {
             debugDrawOn = !debugDrawOn;
-        },
-        MoveDown: function () {
-            yoffset++;
         },
         Draw: function (world) {
             if (debugDrawOn) {
@@ -69,5 +65,4 @@ ROBOTGAME.Camera = (function () {
             }
         }
     };
-
 } ());
