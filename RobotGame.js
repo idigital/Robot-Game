@@ -1,4 +1,4 @@
-﻿var ROBOTGAME = (function () {
+﻿ROBOTGAME.APP = (function () {
 
     // dependencies
     var b2Vec2 = Box2D.Common.Math.b2Vec2,
@@ -12,20 +12,18 @@
 		b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape,
 		b2CircleShape = Box2D.Collision.Shapes.b2CircleShape,
 		b2DebugDraw = Box2D.Dynamics.b2DebugDraw,
-		b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef;
+		b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef,
+        camera = ROBOTGAME.Camera;
 
     // private variables
     var world;
     var player;
-    var debugDrawOn;
 
     var fixDef = new b2FixtureDef;
     fixDef.density = 1.0;
     fixDef.friction = 0.5;
     fixDef.restitution = 0.2;
     var bodyDef = new b2BodyDef;
-
-    var debugDraw;
 
     // private functions
     var CreateWorld = function () {
@@ -42,6 +40,7 @@
         bodyDef.allowSleep = false;
         bodyDef.userData = { type: 'player' };
         player = world.CreateBody(bodyDef).CreateFixture(fixDef);
+        world.player = player;
 
         player.MoveLeft = function () {
             var currentVelocity = this.GetBody().GetLinearVelocity();
@@ -68,55 +67,19 @@
         world.CreateBody(bodyDef).CreateFixture(fixDef);
     };
 
-    var SetupDebugDraw = function (canvasElement) {
-        debugDraw = new b2DebugDraw();
-        debugDraw.SetSprite(document.getElementById(canvasElement).getContext("2d"));
-        debugDraw.SetDrawScale(32.0);
-        debugDraw.SetFillAlpha(0.5);
-        debugDraw.SetLineThickness(1.0);
-        debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
-        world.SetDebugDraw(debugDraw);
-    };
-
     var SetupControls = function () {
         document.addEventListener("keydown", function (key) {
-            if (key.keyCode === 65) {
+            console.log(key.keyCode);
+            if (key.keyCode === 65) {           //A
                 player.MoveLeft();
-            } else if (key.keyCode === 68) {
+            } else if (key.keyCode === 68) {    //D
                 player.MoveRight();
-            } else if (key.keyCode === 87) {
+            } else if (key.keyCode === 87) {    //W
                 player.Jump();
-            } else if (key.keyCode === 83) {
-
+            } else if (key.keyCode === 13) {    //'ENTER'
+                camera.ToggleDebugDraw();
             }
         });
-    };
-
-    var DrawWorld = function (gameWorld) {
-        var scale = 64;
-        var worldbody = gameWorld.GetBodyList();
-        var canvas = document.getElementById("levelCanvas")
-        var ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        while (worldbody.GetNext() !== null) {
-            var bodypos = worldbody.GetPosition();
-            if (worldbody.GetUserData().type === 'brick') {
-                DrawBox(bodypos.x, bodypos.y);
-            } else {
-                DrawPlayer(bodypos.x, bodypos.y);
-            }
-            worldbody = worldbody.GetNext();
-        }
-        function DrawBox(x, y) {
-            var img = new Image();
-            img.src = "Spritesheet.png";
-            ctx.drawImage(img, 0, 32, 32, 32, x * scale, y * scale, scale, scale);
-        }
-        function DrawPlayer(x, y) {
-            var img = new Image();
-            img.src = "Spritesheet.png";
-            ctx.drawImage(img, 32, 0, 32, 32, x * scale, y * scale, scale, scale);
-        }
     };
 
     // public API
@@ -124,9 +87,7 @@
         Init: function () {
             CreateWorld();
             SetupControls();
-            if (debugDrawOn) {
-                SetupDebugDraw("levelCanvas");
-            }
+            camera.Init(world)
         },
 
         LoadLevel: function (levelNumber) {
@@ -151,16 +112,13 @@
 
         Update: function () {
             world.Step(1 / 60, 10, 10);
-            if (debugDrawOn) {
-                world.DrawDebugData();
-            } else {
-                DrawWorld(world);
-            }
+
+            camera.Draw(world);
             world.ClearForces();
         },
 
-        Play: function (isDebugDrawOn) {
-            debugDrawOn = isDebugDrawOn;
+        Play: function () {
+            debugDrawOn = false;
             this.Init();
             this.LoadLevel(1);
             window.setInterval(this.Update, 1000 / 60);
