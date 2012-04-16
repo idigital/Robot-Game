@@ -1,4 +1,4 @@
-﻿ROBOTGAME.APP = (function () {
+ROBOTGAME.APP = (function () {
 
     // dependencies
     var b2Vec2 = Box2D.Common.Math.b2Vec2,
@@ -20,6 +20,7 @@
     var world;
     var player;
 
+
     // private functions
     var CreateWorld = function () {
         world = new b2World(
@@ -31,21 +32,36 @@
     var SetupControls = function () {
         document.addEventListener("keydown", function (key) {
             if (key.keyCode === 65) {           //A
-                world.player.MoveLeft();
+                world.player.moveDir = 'left';
             } else if (key.keyCode === 68) {    //D
-                world.player.MoveRight();
+                world.player.moveDir = 'right';
             } else if (key.keyCode === 87) {    //W
                 world.player.Jump();
             } else if (key.keyCode === 13) {    //'ENTER'
                 camera.ToggleDebugDraw();
             }
         });
+
+        document.addEventListener("keyup", function (key) {
+            if (key.keyCode === 65 || key.keyCode === 68) {
+                world.player.moveDir = 'none';
+            }
+        });
     };
+
+    // var SetupListeners = function () {
+    //     var collisionListener = new Box2D.Dynamics.b2ContactListener;
+    //     collisionListener.BeginContact = function (contact) {
+    //         console.log("collision detected");
+    //         console.dir(contact);            
+    //     };
+    //     world.SetContactListener(collisionListener);
+    // };
 
     // public API
     return {
         Init: function () {
-            CreateWorld();            
+            CreateWorld();
             camera.Init(world)
         },
 
@@ -55,7 +71,7 @@
 
         Update: function () {
             world.Step(1 / 60, 10, 10);
-
+            world.player.Update();
             camera.Draw(world);
             world.ClearForces();
         },
@@ -65,6 +81,7 @@
             this.Init();
             this.LoadLevel(1);
             SetupControls();
+            SetupListeners();
             window.setInterval(this.Update, 1000 / 60);
         }
     };

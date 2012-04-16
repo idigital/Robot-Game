@@ -7,41 +7,51 @@ ROBOTGAME.LevelLoader = (function () {
         b2Vec2 = Box2D.Common.Math.b2Vec2,
         b2CircleShape = Box2D.Collision.Shapes.b2CircleShape,
         b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape,
-        b2BodyDef = Box2D.Dynamics.b2BodyDef;
-
-    var fixDef = new b2FixtureDef;
-    fixDef.density = 1.0;
-    fixDef.friction = 0.5;
-    fixDef.restitution = 0.2;
-    var bodyDef = new b2BodyDef;
+        b2BodyDef = Box2D.Dynamics.b2BodyDef;    
 
     var CreatePlayer = function (x, y, world) {
+        var fixDef = new b2FixtureDef;
+        fixDef.density = 1.0;
+        fixDef.friction = 0.5;
+        fixDef.restitution = 0.2;
+        
+        var bodyDef = new b2BodyDef;
+
         bodyDef.type = b2Body.b2_dynamicBody;
-        fixDef.shape = new b2CircleShape(0.5);
+        fixDef.shape = new b2PolygonShape;
+        fixDef.shape.SetAsBox(0.5, 0.5);
         bodyDef.position.Set(x + 0.5, y + 0.5);
         bodyDef.allowSleep = false;
+        bodyDef.fixedRotation = true;
+
         bodyDef.userData = { type: 'player' };
         player = world.CreateBody(bodyDef).CreateFixture(fixDef);
         world.player = player;
 
-        player.MoveLeft = function () {
-            var currentVelocity = this.GetBody().GetLinearVelocity();
-            this.GetBody().SetLinearVelocity(new b2Vec2(-2.5, currentVelocity.y));
-        };
-        player.MoveRight = function () {
-            var currentVelocity = this.GetBody().GetLinearVelocity();
-            this.GetBody().SetLinearVelocity(new b2Vec2(2.5, currentVelocity.y));
-        };
         player.Jump = function () {
             var currentVelocity = this.GetBody().GetLinearVelocity();
             if (currentVelocity.y === 0) {
                 this.GetBody().SetLinearVelocity(new b2Vec2(currentVelocity.x, -6.5));
             }
         };
+        player.Update = function () {
+            var currentVelocity = this.GetBody().GetLinearVelocity();
+            if (this.moveDir === 'left') {
+                this.GetBody().SetLinearVelocity(new b2Vec2(-2.5, currentVelocity.y));
+            } else if (this.moveDir === 'right') {
+                this.GetBody().SetLinearVelocity(new b2Vec2(2.5, currentVelocity.y));
+            }
+        }; 
     };
 
     var CreateBlock = function (x, y, type, world) {
-        console.log(type);
+        var fixDef = new b2FixtureDef;
+        fixDef.density = 1.0;
+        fixDef.friction = 0.5;
+        fixDef.restitution = 0.2;
+        
+        var bodyDef = new b2BodyDef;        
+
         bodyDef.type = b2Body.b2_staticBody;
         fixDef.shape = new b2PolygonShape;
         fixDef.shape.SetAsBox(0.5, 0.5);
